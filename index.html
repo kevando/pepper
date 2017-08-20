@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Welcome to Sockets i-mo</title>
+		<style type="text/css">
+			#left, #right, #up, #down {
+				background: #4c4c4c; /* Old browsers */
+				background: -moz-linear-gradient(top,  #4c4c4c 0%, #595959 12%, #666666 25%, #474747 39%, #2c2c2c 50%, #000000 51%, #111111 60%, #2b2b2b 76%, #1c1c1c 91%, #131313 100%); /* FF3.6+ */
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c), color-stop(12%,#595959), color-stop(25%,#666666), color-stop(39%,#474747), color-stop(50%,#2c2c2c), color-stop(51%,#000000), color-stop(60%,#111111), color-stop(76%,#2b2b2b), color-stop(91%,#1c1c1c), color-stop(100%,#131313)); /* Chrome,Safari4+ */
+				background: -webkit-linear-gradient(top,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* Chrome10+,Safari5.1+ */
+				background: -o-linear-gradient(top,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* Opera 11.10+ */
+				background: -ms-linear-gradient(top,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* IE10+ */
+				background: linear-gradient(to bottom,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* W3C */
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c4c4c', endColorstr='#131313',GradientType=0 ); /* IE6-9 */
+				color: #fff;
+				font-size: 40px;
+				font-weight: bold;
+				padding: 10% 0;
+    			width: 200px;
+				margin: 15px 25px;
+				-webkit-appearance: none;
+				border-radius: 20px;
+			}
+
+			#game-pad {
+				margin: 0px auto;
+				width: 75%;
+				margin-top: 20%;
+			}
+		</style>
+	</head>
+	<body class="main">
+		<div id="welcome"></div>
+		<div id="playerStatus"></div>
+			<input id="updateNameInput" placeholder="@whoAreYou?">
+
+			<button id="updateNameButton">
+				Update Name
+			</button>
+
+			<button id="startGameButton">
+				Start Game
+			</button>
+
+			<button id="buyCarsButton">
+				Buy Row of Cars
+			</button>
+
+
+
+			<button id="becomeFrogButton">
+				Become Frog
+			</button>
+		<div id="game-screen">
+			<hr />
+			<div id="users" style="float:right;"></div>
+			<div id="leaderboard" style="float:right;"></div>
+			<canvas id="mo-canvas" width="900" height="600" style="border:1px solid #000000"></canvas>
+		</div>
+		<!-- Dress up this div and the buttons to make it look like an NES controller -->
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+		<script type="text/javascript">
+			window.onload = function() {
+				if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+					//hide pretty much everything but the game pad
+					$("#game-screen").hide();
+					$("#game-pad").show();
+					$("#left").click(function() {
+						socket.emit("onKeyPress", "left");
+					});
+					$("#right").click(function() {
+						socket.emit("onKeyPress", "right");
+					});
+					$("#up").click(function() {
+						socket.emit("onKeyPress", "up");
+					});
+					$("#down").click(function() {
+						socket.emit("onKeyPress", "down");
+					});
+				}
+
+				var c = document.getElementById("mo-canvas");
+				var ctx = c.getContext("2d");
+
+				var welcome = document.getElementById("welcome");
+				var allUsers = document.getElementById("users");
+				var leaderboard = document.getElementById("leaderboard");
+				var updateNameInput = document.getElementById("updateNameInput");
+				var updateNameButton = document.getElementById("updateNameButton");
+				var becomeFrogButton = document.getElementById("becomeFrogButton");
+				var startGameButton = document.getElementById("startGameButton");
+				var buyCarsButton = document.getElementById("buyCarsButton");
+				var playerStatus = document.getElementById("playerStatus");
+
+				var socket = io.connect(window.location.hostname+':3000');
+
+				socket.on('welcome', function(data) {
+					welcome.innerHTML = "Welcome  <strong>" + data['currentUser'].name + "</strong>";
+					allUsers.innerHTML = "<strong>Users:</strong><br />" + data.names;
+					// console.log('data.names',data.names)
+
+					// If a player is already a frog, hide the become frog button
+
+				});
+
+				socket.on('users', function(data) {
+					// console.log(data)
+					// for (var i = 0; i < data.users.length; i++) {
+					// 	if (data.user.id === data.users[i].id && data.users[i].player) {
+					// 		playerStatus.innerHTML = "<h3>YOU ARE THE FROG!</h3>"
+					// 		break;
+					// 	}
+					// }
+					// if(data.user.player) {
+					// 	playerStatus.innerHTML = "<h3>YOU ARE THE FROG!</h3>"
+					// }
+					allUsers.innerHTML = "<strong>Users:</strong><br />" + data.names;
+				});
+
+				socket.on('userJoined', function(data) {
+					console.log(data)
+
+					allUsers.innerHTML = "<strong>Users:</strong><br />" + data.names;
+				});
+
+				socket.on('becameFrog', function(data) {
+					console.log('became from data',data)
+					// alert('someone became the frog!!!!!!!')
+					becomeFrogButton.style.display = 'none';
+				});
+
+				socket.on('startGame', function() {
+					// alert('someone became the frog!!!!!!!')
+					becomeFrogButton.style.display = 'none';
+				});
+
+				function printUsers(userNames) {
+
+				}
+
+				socket.on('lose', function(data) {
+					console.log(data + "  loses!");
+				});
+
+				socket.on('draw', function(data) {
+
+
+					ctx.clearRect(0, 0, c.width, c.height);
+
+					var ctxSquare = c.getContext('2d');
+					ctxSquare.fillStyle = '#222222';
+					ctxSquare.fillRect(0, 180, 950, 300);
+					var ctxGrass = c.getContext('2d');
+					ctxGrass.fillStyle = '#47581A';
+					ctxGrass.fillRect(0, 0, 950, 180);
+					var ctxGrass2 = c.getContext('2d');
+					ctxGrass2.fillStyle = '#47581A';
+					ctxGrass2.fillRect(0, 480, 950, 120);
+
+					var ctxRoadMark1 = c.getContext('2d');
+					ctxRoadMark1.fillStyle = '#fff';
+					ctxRoadMark1.fillRect(40, 320, 190, 20);
+
+					var ctxRoadMark2 = c.getContext('2d');
+					ctxRoadMark2.fillStyle = '#fff';
+					ctxRoadMark2.fillRect(350, 320, 190, 20);
+
+					var ctxRoadMark3 = c.getContext('2d');
+					ctxRoadMark3.fillStyle = '#fff';
+					ctxRoadMark3.fillRect(660, 320, 190, 20);
+					var ctxCircle = c.getContext('2d');
+
+					for (var k = 0; k < data.cars.length; k += 1) {
+						ctx.beginPath();
+						ctx.rect(data.cars[k].x, data.cars[k].y, 50, 50);
+						ctx.fillStyle = 'blue';
+						ctx.fill();
+					}
+
+					for (var i = 0; i < data.users.length; i += 1) {
+						ctx.beginPath();
+
+						var frog = new Image();
+						frog.src = "https://s3.amazonaws.com/2014Portfolio/frog.png";
+
+						// now only draw the frog if its THE player
+						if(data.users[i].player && data.isGameLive ) {
+							ctx.drawImage(frog, data.users[i].location.x, data.users[i].location.y);
+							ctx.font = "12px Arial";
+							ctx.fillText(data.users[i].name, data.users[i].location.x, data.users[i].location.y);
+						}
+
+					}
+
+				});
+
+				document.onkeydown = checkKey;
+				function checkKey(e) {
+					e = e || window.event;
+					if (e.keyCode == '37') {
+						socket.emit("onKeyPress", "left");
+					} else if (e.keyCode == '38') {
+						socket.emit("onKeyPress", "up");
+					} else if (e.keyCode == '39') {
+						socket.emit("onKeyPress", "right");
+					} else if (e.keyCode == '40') {
+						socket.emit("onKeyPress", "down");
+					}
+				}
+
+
+				updateNameButton.onclick = function() {
+					welcome.innerHTML = "Welcome " + updateNameInput.value + "</strong>";
+					socket.emit("UpdateUserName", updateNameInput.value);
+				};
+
+				becomeFrogButton.onclick = function() {
+					// alert('start game')
+					// welcome.innerHTML = "Welcome " + updateNameInput.value + "</strong>";
+					playerStatus.innerHTML = "<h3>YOU ARE THE FROG!</h3>"
+					buyCarsButton.style.display = 'hidden'
+					socket.emit("BecomeFrog");
+				};
+
+				startGameButton.onclick = function () {
+					console.log("Start Game Clicked")
+					socket.emit("StartGame")
+				}
+
+				buyCarsButton.onclick = function () {
+					console.log("Buy Clicked")
+					buyCarsButton.style.display = 'hidden'
+					socket.emit("BuyCarRow")
+				}
+
+			};
+		</script>
+
+	</body>
+</html>

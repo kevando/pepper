@@ -1,0 +1,7 @@
+Multiplayer version of frogger
+
+mongoose is only there for potential storage down the road
+
+npm install
+npm install mongoose    
+node app.js
