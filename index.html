@@ -150,28 +150,51 @@
 
 					ctx.clearRect(0, 0, c.width, c.height);
 
+					var colors = {
+						road: 'orange',
+						endGrass: 'green',
+						startGrass: 'brown',
+					}
+					var road = {h: 10, w: 120, start: 40, spacing: 230}
+
+					// ctx.fillRect(x, y, width, height);
+
 					var ctxSquare = c.getContext('2d');
-					ctxSquare.fillStyle = '#222222';
-					ctxSquare.fillRect(0, 180, 950, 300);
+					ctxSquare.fillStyle = colors.road;
+					ctxSquare.fillRect(0, 100, 950, 1390);
+
 					var ctxGrass = c.getContext('2d');
-					ctxGrass.fillStyle = '#47581A';
-					ctxGrass.fillRect(0, 0, 950, 180);
+					ctxGrass.fillStyle = colors.endGrass;
+					ctxGrass.fillRect(0, 0, 950, 100);
+
 					var ctxGrass2 = c.getContext('2d');
-					ctxGrass2.fillStyle = '#47581A';
+					ctxGrass2.fillStyle = colors.startGrass;
 					ctxGrass2.fillRect(0, 480, 950, 120);
 
-					var ctxRoadMark1 = c.getContext('2d');
-					ctxRoadMark1.fillStyle = '#fff';
-					ctxRoadMark1.fillRect(40, 320, 190, 20);
+					var ctxRoadMark = c.getContext('2d');
+					ctxRoadMark.fillStyle = '#fff';
+					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
 
-					var ctxRoadMark2 = c.getContext('2d');
-					ctxRoadMark2.fillStyle = '#fff';
-					ctxRoadMark2.fillRect(350, 320, 190, 20);
+					road.start = road.start+road.spacing
+					var ctxRoadMark = c.getContext('2d');
+					ctxRoadMark.fillStyle = '#fff';
+					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
 
-					var ctxRoadMark3 = c.getContext('2d');
-					ctxRoadMark3.fillStyle = '#fff';
-					ctxRoadMark3.fillRect(660, 320, 190, 20);
-					var ctxCircle = c.getContext('2d');
+					road.start = road.start+road.spacing
+					var ctxRoadMark = c.getContext('2d');
+					ctxRoadMark.fillStyle = '#fff';
+					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
+
+					road.start = road.start+road.spacing
+					var ctxRoadMark = c.getContext('2d');
+					ctxRoadMark.fillStyle = '#fff';
+					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
+
+
 
 					for (var k = 0; k < data.cars.length; k += 1) {
 						ctx.beginPath();
