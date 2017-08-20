@@ -80,7 +80,7 @@
 		<!-- Dress up this div and the buttons to make it look like an NES controller -->
 
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-		<script src="https://peppeasdfasdr-fresh.netlify.com/socket.io/socket.io.js"></script>
+		<script src="https://gae-boilerplate-2016.appspot.com/socket.io/socket.io.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
 		<script type="text/javascript">
 			window.onload = function() {
@@ -117,7 +117,7 @@
 				var gameStatusText = document.getElementById("gameStatusText");
 				var attemptsText = document.getElementById("attemptsText");
 
-				var socket = io.connect(window.location.hostname+':3000');
+				var socket = io.connect(window.location.hostname+':8080');
 
 				socket.on('welcome', function(data) {
 					welcome.innerHTML = "<strong>" + data['currentUser'].name + "</strong>";
