@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "description": "SocketioExample",
     "scripts": {
-      "start": "node app"
+      "start": "pm2 start app"
     },
     "dependencies": {
         "express": "^4.15.4",
