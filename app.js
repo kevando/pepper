@@ -11,7 +11,7 @@ var app = require('http').createServer(handler);
 var io = require('socket.io').listen(app);
 var fs = require('fs');
 // var Moniker = require('moniker');
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 8080;
 
 app.listen(port);
 
