@@ -3,23 +3,9 @@
 	<head>
 		<title>Welcome to Sockets i-mo</title>
 		<style type="text/css">
-			#left, #right, #up, #down {
-				background: #4c4c4c; /* Old browsers */
-				background: -moz-linear-gradient(top,  #4c4c4c 0%, #595959 12%, #666666 25%, #474747 39%, #2c2c2c 50%, #000000 51%, #111111 60%, #2b2b2b 76%, #1c1c1c 91%, #131313 100%); /* FF3.6+ */
-				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c), color-stop(12%,#595959), color-stop(25%,#666666), color-stop(39%,#474747), color-stop(50%,#2c2c2c), color-stop(51%,#000000), color-stop(60%,#111111), color-stop(76%,#2b2b2b), color-stop(91%,#1c1c1c), color-stop(100%,#131313)); /* Chrome,Safari4+ */
-				background: -webkit-linear-gradient(top,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* Chrome10+,Safari5.1+ */
-				background: -o-linear-gradient(top,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* Opera 11.10+ */
-				background: -ms-linear-gradient(top,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* IE10+ */
-				background: linear-gradient(to bottom,  #4c4c4c 0%,#595959 12%,#666666 25%,#474747 39%,#2c2c2c 50%,#000000 51%,#111111 60%,#2b2b2b 76%,#1c1c1c 91%,#131313 100%); /* W3C */
-				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c4c4c', endColorstr='#131313',GradientType=0 ); /* IE6-9 */
-				color: #fff;
-				font-size: 40px;
-				font-weight: bold;
-				padding: 10% 0;
-    			width: 200px;
-				margin: 15px 25px;
-				-webkit-appearance: none;
-				border-radius: 20px;
+
+			#game-screen {
+
 			}
 
 			#game-pad {
@@ -27,34 +13,68 @@
 				width: 75%;
 				margin-top: 20%;
 			}
+			table td {
+				padding: 2px 4px
+			}
+
+			body {
+				background-color: black;
+				color: #03ff03;
+				font-family: 'Courier New';
+				padding: 0px 0 0 20px;
+			}
+			.title {
+				font-size: 40px;
+				text-align: center;
+				margin: 20px;
+		    font-weight: 500;
+		    letter-spacing: 0.08em;
+			}
+			.game-status {
+				width: 250px;
+				float: right;
+				margin-right: 40px;
+			}
+			.game-status p{
+				font-style: italic;
+			}
+
 		</style>
 	</head>
 	<body class="main">
+		<h1 class="title">Pepe Unchained</h1>
 		<div id="welcome"></div>
 		<div id="playerStatus"></div>
-			<input id="updateNameInput" placeholder="@whoAreYou?">
+			<input id="updateNameInput" placeholder="Your Nickname">
 
 			<button id="updateNameButton">
 				Update Name
 			</button>
 
-			<button id="startGameButton">
-				Start Game
-			</button>
+
 
 			<button id="buyCarsButton">
 				Buy Row of Cars
 			</button>
 
-
-
 			<button id="becomeFrogButton">
 				Become Frog
 			</button>
+
+
+
 		<div id="game-screen">
-			<hr />
+
+
 			<div id="users" style="float:right;"></div>
-			<div id="leaderboard" style="float:right;"></div>
+			<div class="game-status">
+				<p id="gameStatusText">Waiting for more players</p>
+				<p id="attemptsText"></p>
+				<button id="startGameButton" style="display:inline">
+					Start Game
+				</button>
+			</div>
+
 			<canvas id="mo-canvas" width="900" height="600" style="border:1px solid #000000"></canvas>
 		</div>
 		<!-- Dress up this div and the buttons to make it look like an NES controller -->
@@ -94,36 +114,37 @@
 				var startGameButton = document.getElementById("startGameButton");
 				var buyCarsButton = document.getElementById("buyCarsButton");
 				var playerStatus = document.getElementById("playerStatus");
+				var gameStatusText = document.getElementById("gameStatusText");
+				var attemptsText = document.getElementById("attemptsText");
 
 				var socket = io.connect(window.location.hostname+':3000');
 
 				socket.on('welcome', function(data) {
-					welcome.innerHTML = "Welcome  <strong>" + data['currentUser'].name + "</strong>";
-					allUsers.innerHTML = "<strong>Users:</strong><br />" + data.names;
-					// console.log('data.names',data.names)
-
-					// If a player is already a frog, hide the become frog button
-
+					welcome.innerHTML = "<strong>" + data['currentUser'].name + "</strong>";
+					allUsers.innerHTML = "<strong>Users:</strong><br />" + "<table border=1><tr><th>Username</th><th>Status</th><th>Score</th></tr>" + data.names + "</table>";
+					if(data.isGameLive){
+						startGameButton.style.display = 'none';
+					}
 				});
 
 				socket.on('users', function(data) {
-					// console.log(data)
-					// for (var i = 0; i < data.users.length; i++) {
-					// 	if (data.user.id === data.users[i].id && data.users[i].player) {
-					// 		playerStatus.innerHTML = "<h3>YOU ARE THE FROG!</h3>"
-					// 		break;
-					// 	}
-					// }
-					// if(data.user.player) {
-					// 	playerStatus.innerHTML = "<h3>YOU ARE THE FROG!</h3>"
-					// }
-					allUsers.innerHTML = "<strong>Users:</strong><br />" + data.names;
+
+					allUsers.innerHTML = "<strong>Users:</strong><br />" + "<table border=1><tr><th>Username</th><th>Status</th><th>Score</th></tr>" + data.names + "</table>";
+
+					if(data.carOwners.length >=3 && data.currentPlayer){
+						console.log('we can start the game now')
+						startGameButton.style.display = 'inline';
+						gameStatusText.innerHTML = 'LETS GET READY TO RUMBLE'
+						attemptsText.innerHTML = data.currentPlayer.name + ' has ' + data.gameData.playerAttempts + 'attempts left'
+					}
+
+
 				});
 
 				socket.on('userJoined', function(data) {
 					console.log(data)
 
-					allUsers.innerHTML = "<strong>Users:</strong><br />" + data.names;
+					allUsers.innerHTML = "<strong>Users:</strong><br />" + "<table border=1><tr><th>Username</th><th>Status</th><th>Score</th></tr>" + data.names + "</table>";
 				});
 
 				socket.on('becameFrog', function(data) {
@@ -135,6 +156,11 @@
 				socket.on('startGame', function() {
 					// alert('someone became the frog!!!!!!!')
 					becomeFrogButton.style.display = 'none';
+				});
+
+				socket.on('gameStarted', function() {
+					// alert('someone became the frog!!!!!!!')
+					gameStatusText.innerHTML = 'GAME IS LIVE!'
 				});
 
 				function printUsers(userNames) {
@@ -151,9 +177,9 @@
 					ctx.clearRect(0, 0, c.width, c.height);
 
 					var colors = {
-						road: 'orange',
+						road: '#616161',
 						endGrass: 'green',
-						startGrass: 'brown',
+						startGrass: 'green',
 					}
 					var road = {h: 10, w: 120, start: 40, spacing: 230}
 
@@ -173,33 +199,34 @@
 
 					var ctxRoadMark = c.getContext('2d');
 					ctxRoadMark.fillStyle = '#fff';
-					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
-					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
+					ctxRoadMark.fillRect(road.start, 350, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 220, road.w, road.h);
 
 					road.start = road.start+road.spacing
 					var ctxRoadMark = c.getContext('2d');
 					ctxRoadMark.fillStyle = '#fff';
-					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
-					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
+					ctxRoadMark.fillRect(road.start, 350, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 220, road.w, road.h);
 
 					road.start = road.start+road.spacing
 					var ctxRoadMark = c.getContext('2d');
 					ctxRoadMark.fillStyle = '#fff';
-					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
-					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
+					ctxRoadMark.fillRect(road.start, 350, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 220, road.w, road.h);
 
 					road.start = road.start+road.spacing
 					var ctxRoadMark = c.getContext('2d');
 					ctxRoadMark.fillStyle = '#fff';
-					ctxRoadMark.fillRect(road.start, 400, road.w, road.h);
-					ctxRoadMark.fillRect(road.start+50, 280, road.w, road.h);
+					ctxRoadMark.fillRect(road.start, 350, road.w, road.h);
+					ctxRoadMark.fillRect(road.start+50, 220, road.w, road.h);
 
 
 
 					for (var k = 0; k < data.cars.length; k += 1) {
+						console.log(data.cars[k])
 						ctx.beginPath();
 						ctx.rect(data.cars[k].x, data.cars[k].y, 50, 50);
-						ctx.fillStyle = 'blue';
+						ctx.fillStyle = data.cars[k].color;
 						ctx.fill();
 					}
 
@@ -238,13 +265,15 @@
 				updateNameButton.onclick = function() {
 					welcome.innerHTML = "Welcome " + updateNameInput.value + "</strong>";
 					socket.emit("UpdateUserName", updateNameInput.value);
+					updateNameInput.style.display = 'none';
+					updateNameButton.style.display = 'none';
 				};
 
 				becomeFrogButton.onclick = function() {
 					// alert('start game')
 					// welcome.innerHTML = "Welcome " + updateNameInput.value + "</strong>";
 					playerStatus.innerHTML = "<h3>YOU ARE THE FROG!</h3>"
-					buyCarsButton.style.display = 'hidden'
+					buyCarsButton.style.display = 'none'
 					socket.emit("BecomeFrog");
 				};
 
@@ -255,7 +284,8 @@
 
 				buyCarsButton.onclick = function () {
 					console.log("Buy Clicked")
-					buyCarsButton.style.display = 'hidden'
+					buyCarsButton.style.display = 'none'
+					becomeFrogButton.style.display = 'none'
 					socket.emit("BuyCarRow")
 				}
 

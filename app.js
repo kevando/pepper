@@ -22,7 +22,9 @@ io.sockets.on('connection', function(socket) {
 	var data = {
 		'currentUser' : user,
 		'users' : users,
-		'names' : userNames(users)
+		'names' : userNames(users),
+		'isGameLive' : isGameLive,
+		'gameData' : gameData
 	};
 
 
@@ -77,14 +79,17 @@ io.sockets.on('connection', function(socket) {
 		console.log('start game')
 		isGameLive = true;
 
+
+		io.sockets.emit("gameStarted");
+
 		setInterval(function() {
-			var c1 = new Car(20, 20, 0, 400, 'left');
-			var c2 = new Car(20, 20, 850, 200, 'right');
-			var c3 = new Car(20, 20, 0, 100, 'left');
+			var c1 = new Car(20, 20, 0, 400, 'left', 'yellow');
+			var c2 = new Car(20, 20, 850, 280, 'right', 'orange');
+			var c3 = new Car(20, 20, 0, 120, 'left', 'red');
 			cars.push(c1);
 			cars.push(c2);
 			cars.push(c3);
-		}, 1000);
+		}, carInterval);
 
 	})
 
@@ -99,7 +104,8 @@ io.sockets.on('connection', function(socket) {
 		io.sockets.emit("users", {
 			'names' : userNames(users),
 			'users' : users,
-			'user' : user
+			'user' : user,
+			'gameData' : gameData
 		});
 	});
 
@@ -108,6 +114,7 @@ io.sockets.on('connection', function(socket) {
 		for (var i = 0; i < users.length; i++) {
 			if (user.id === users[i].id) {
 				users[i].player = true;
+				currentPlayer = users[i];
 				break;
 			}
 		}
@@ -117,15 +124,30 @@ io.sockets.on('connection', function(socket) {
 		io.sockets.emit("users", {
 			'names' : userNames(users),
 			'users' : users,
-			'user' : user
+			'user' : user,
+			'currentPlayer' : currentPlayer,
+			'gameData' : gameData
 		});
 
 	});
 
-	socket.on("BuyCarRow", function(n) {;
+
+	socket.on("BuyCarRow", function(n) {
 		console.log("BuyCarRow")
-
-
+		for (var i = 0; i < users.length; i++) {
+			if (user.id === users[i].id) {
+				users[i].color = carColors[users.length-1];
+				carOwners.push(users[i])
+				break;
+			}
+		}
+		io.sockets.emit("users", {
+			'names' : userNames(users),
+			'users' : users,
+			'user' : user,
+			'carOwners' : carOwners,
+			'gameData' : gameData
+		});
 	});
 
 });
@@ -134,10 +156,17 @@ io.sockets.on('connection', function(socket) {
 var users = [];
 var cars = [];
 var isGameLive = false;
-var potentialCars =[];
+var carColors =['yellow','orange','red'];
+var gameReady = false;
+var carOwners = []
+var currentPlayer = null;
+
+var gameData = {
+	playerAttempts: 5,
+}
 
 function userNames(users) {
-	var str = '<table border=1>';
+	var str = '';
 	for (var i = 0; i < users.length; i++) {
 		var user = users[i];
 		str += '<tr><td>' + user.name + '</td>'
@@ -146,21 +175,21 @@ function userNames(users) {
 		if(user.color) { status = user.color }
 		str+= '<td>' + status +'</td>'
 
+		str+= '<td>' + user.score +'</td>'
+
 		str += '</tr>';
 
 	}
-	return str+'</table>';
+	return str;
 }
 
 
-
-function newUserLocation() {
-
-}
 
 var addUser = function() {
 	var user = {
 		id : users.length,
+		score: 0,
+		color: null,
 		won : false,
 		lost : false,
 		player : false,
@@ -183,47 +212,82 @@ var removeUser = function(user) {
 	io.sockets.emit("users", {
 		'user' : user,
 		'names' : userNames(users),
-		'users' : users
+		'users' : users,
+		'gameData' : gameData
 	});
 };
 
-function Car(width, height, x, y, direction) {
+function Car(width, height, x, y, direction, color) {
 	this.width = width;
 	this.height = height;
 	this.x = x;
 	this.y = y;
 	this.direction = direction;
+	this.color = color;
 }
 
 
 
 function detectCollisons() {
+	// var killerCar = null;
 	for (var i = 0; i < cars.length; i += 1) {
 		for (var j = 0; j < users.length; j += 1) {
 			if (Math.abs((cars[i].x - users[j].location.x)) < 50) {
 				if (Math.abs((cars[i].y - users[j].location.y)) < 50) {
+					console.log('user lost?!')
 					var loser = users[j];
 					users[j].location.y = 540;
 					users[j].lost = true;
-					// io.sockets.emit("lose", loser.name);                ///may not need a lose event
+					users[j].score = users[j].score - 1;
+
+					// console.log('user killed by car of color: ',cars[i].color)
+					// killerCar = cars[i].color
+					gameData.playerAttempts = gameData.playerAttempts - 1;
+
+					if(gameData.playerAttempts == 0) {
+						alert('GAME OVER FOR PEPE')
+					}
+
+					// update score of killer car
+					for (var k = 0; k < users.length; k += 1) {
+						if(cars[i].color == users[k].color){
+							console.log('frog killed by user: ',users[k])
+							users[k].score = users[k].score + 1
+						}
+					}
+
 					io.sockets.emit("users", {
 						'names' : userNames(users),
-						'users' : users
+						'users' : users,
+						'gameData' : gameData
 					});
 				}
 			}
-			if(users[j].location.y<0){
-				users[j].won = true;
+			// console.log('user y: ',users[j].location.y)
+			if(users[j].location.y<50){
+				console.log('user WON?!')
+				users[j].score = users[j].score+1
+				users[j].location.x = 0
+				users[j].location.y = 540
 				io.sockets.emit("users", {
 						'names' : userNames(users),
-						'users' : users
+						'users' : users,
+						'gameData' : gameData
 					});
+					// io.sockets.emit("userWon", {
+					// 		'user' : users[j],
+					// 		'names' : userNames(users),
+					// 		'users' : users
+					// 	});
 			}
 		}
 	}
 }
 
+
+
 var speed = -30;
+var carInterval = 2000;
 
 setInterval(function() {
 	// console.log('interval')
