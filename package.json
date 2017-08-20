@@ -3,7 +3,9 @@
     "version": "0.0.1",
     "description": "SocketioExample",
     "scripts": {
-      "start": "pm2 start app"
+      "start": "pm2 start app",
+      "build" : "",
+      "build-preview" : ""
     },
     "dependencies": {
         "express": "^4.15.4",
